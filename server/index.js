@@ -69,7 +69,21 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// API Routes
+// API Routes with MongoDB connection check
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database connection error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
@@ -94,20 +108,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Initialize MongoDB connection and start server only in development
+// Initialize server only in development
 if (process.env.NODE_ENV !== 'production') {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
-    });
-  }).catch(err => {
-    console.error('Failed to connect to MongoDB:', err);
-    process.exit(1);
-  });
-} else {
-  // For production (Vercel), just connect to MongoDB
-  connectDB().catch(err => {
-    console.error('Failed to connect to MongoDB:', err);
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
   });
 }
 
