@@ -7,16 +7,5 @@
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
-  ],
-  "env": {
-    "MONGO_URI": "@mongo_uri",
-    "SECRET_KEY": "@secret_key",
-    "CLOUD_NAME": "@cloud_name",
-    "API_KEY": "@api_key",
-    "API_SECRET": "@api_secret",
-    "ERONTEND_URL": "@erontend_url",
-    "RAZORPAY_KEY_ID": "@razorpay_key_id",
-    "RAZORPAY_SECRET": "@razorpay_secret",
-    "RAZORPAY_WEBHOOK_SECRET": "@razorpay_webhook_secret"
-  }
+  ]
 } 
