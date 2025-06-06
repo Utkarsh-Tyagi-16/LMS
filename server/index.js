@@ -26,9 +26,6 @@ console.log('Environment Variables:', {
     RAZORPAY_SECRET: process.env.RAZORPAY_SECRET ? 'Set' : 'Not Set'
 });
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -67,17 +64,17 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use(cookieParser());
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // API Routes
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/purchase", purchaseRoute);
 app.use("/api/v1/progress", courseProgressRoute);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
 
 // 404 Handler
 app.use((req, res) => {
@@ -97,10 +94,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-// For local development
+// Initialize MongoDB connection and start server only in development
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
+  });
+} else {
+  // For production (Vercel), just connect to MongoDB
+  connectDB().catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
   });
 }
 
