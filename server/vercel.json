@@ -13,6 +13,14 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "CLOUD_NAME": "@cloud_name",
+    "API_KEY": "@api_key",
+    "API_SECRET": "@api_secret",
+    "FRONTEND_URL": "@frontend_url",
+    "RAZORPAY_KEY_ID": "@razorpay_key_id",
+    "RAZORPAY_SECRET": "@razorpay_secret",
+    "RAZORPAY_WEBHOOK_SECRET": "@razorpay_webhook_secret"
   }
 } 
