@@ -21,9 +21,9 @@ const connectDB = async () => {
             serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
             socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
             family: 4, // Use IPv4, skip trying IPv6
-            maxPoolSize: 10, // Maximum number of connections in the pool
-            minPoolSize: 1, // Minimum number of connections in the pool
-            maxIdleTimeMS: 60000, // How long a connection can remain idle before being removed
+            maxPoolSize: 1, // Maximum number of connections in the pool
+            minPoolSize: 0, // Minimum number of connections in the pool
+            maxIdleTimeMS: 10000, // How long a connection can remain idle before being removed
             connectTimeoutMS: 10000, // How long to wait for initial connection
             retryWrites: true, // Retry write operations if they fail
             retryReads: true, // Retry read operations if they fail
@@ -32,6 +32,7 @@ const connectDB = async () => {
         };
 
         try {
+            console.log('Connecting to MongoDB...');
             cached.promise = mongoose.connect(process.env.MONGO_URI, opts)
                 .then((mongoose) => {
                     console.log('MongoDB Connected Successfully');
@@ -61,10 +62,14 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.on('error', (err) => {
     console.error('Mongoose connection error:', err);
+    cached.conn = null;
+    cached.promise = null;
 });
 
 mongoose.connection.on('disconnected', () => {
     console.log('Mongoose disconnected from MongoDB');
+    cached.conn = null;
+    cached.promise = null;
 });
 
 // Handle process termination
