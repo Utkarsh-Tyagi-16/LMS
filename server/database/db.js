@@ -28,11 +28,16 @@ const connectDB = async () => {
             retryWrites: true, // Retry write operations if they fail
             retryReads: true, // Retry read operations if they fail
             w: 'majority', // Write concern
-            wtimeoutMS: 2500 // Write concern timeout
+            wtimeoutMS: 2500, // Write concern timeout
+            useNewUrlParser: true,
+            useUnifiedTopology: true
         };
 
         try {
             console.log('Connecting to MongoDB...');
+            if (!process.env.MONGO_URI) {
+                throw new Error('MONGO_URI is not defined in environment variables');
+            }
             cached.promise = mongoose.connect(process.env.MONGO_URI, opts)
                 .then((mongoose) => {
                     console.log('MongoDB Connected Successfully');
