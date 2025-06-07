@@ -69,8 +69,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// API Routes with MongoDB connection check
-app.use(async (req, res, next) => {
+// MongoDB connection middleware
+const connectDBMiddleware = async (req, res, next) => {
   try {
     await connectDB();
     next();
@@ -82,8 +82,12 @@ app.use(async (req, res, next) => {
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-});
+};
 
+// Apply MongoDB connection middleware to all API routes
+app.use('/api', connectDBMiddleware);
+
+// API Routes
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
