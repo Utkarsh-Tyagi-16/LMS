@@ -27,11 +27,5 @@
     "MONGO_URI": "mongodb+srv://utkarshty2004:qx1QqzOAXgOWoCiF@cluster0.dahaola.mongodb.net/lms",
     "NODE_ENV": "production",
     "FRONTEND_URL": "https://lms-frontend-omega.vercel.app"
-  },
-  "functions": {
-    "api/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
   }
 } 
