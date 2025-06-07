@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 // CORS middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: "https://lms-frontend-omega.vercel.app",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
@@ -76,14 +76,9 @@ const connectDBMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Database connection error:', error);
-    // Don't send error details in production
-    const errorMessage = process.env.NODE_ENV === 'production' 
-      ? 'Database connection error' 
-      : error.message;
-    
     res.status(500).json({
       success: false,
-      message: errorMessage
+      message: 'Database connection error'
     });
   }
 };
@@ -109,14 +104,9 @@ app.use((req, res) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error("Error:", err);
-  // Don't send error details in production
-  const errorMessage = process.env.NODE_ENV === 'production' 
-    ? 'Internal server error' 
-    : err.message;
-  
   res.status(500).json({ 
     success: false,
-    message: errorMessage
+    message: "Internal server error"
   });
 });
 
