@@ -1,23 +1,5 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
-import { fileURLToPath } from 'url';
-
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Create uploads directory with absolute path
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    try {
-        fs.mkdirSync(uploadDir, { recursive: true });
-        console.log('Created uploads directory at:', uploadDir);
-    } catch (error) {
-        console.error('Error creating uploads directory:', error);
-        throw error;
-    }
-}
 
 // Configure storage to use memory instead of disk
 const storage = multer.memoryStorage();
