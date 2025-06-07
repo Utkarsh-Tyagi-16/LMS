@@ -1,11 +1,31 @@
 {
   "version": 2,
-  "buildCommand": "cd server && npm install",
-  "outputDirectory": "server",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "server/index.js",
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-razorpay-key, x-razorpay-payment-id, x-razorpay-signature, x-razorpay-order-id",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server/index.js"
+    }
+  ],
+  "env": {
+    "MONGO_URI": "mongodb+srv://utkarshty2004:qx1QqzOAXgOWoCiF@cluster0.dahaola.mongodb.net/lms",
+    "NODE_ENV": "production",
+    "FRONTEND_URL": "https://lms-frontend-omega.vercel.app"
+  }
 } 
