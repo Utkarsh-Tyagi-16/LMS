@@ -25,22 +25,22 @@ export const uploadMedia = async (file) => {
             throw new Error("No file provided");
         }
 
-        if (!fs.existsSync(file)) {
-            throw new Error(`File does not exist at path: ${file}`);
-        }
-
         // Check if Cloudinary is configured
         if (missingEnvVars.length > 0) {
             throw new Error("Cloudinary is not configured. Please set up your Cloudinary credentials in .env file");
         }
 
         console.log("Starting Cloudinary upload for file:", {
-            path: file,
-            size: fs.statSync(file).size,
-            exists: fs.existsSync(file)
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size
         });
 
-        const uploadResponse = await cloudinary.uploader.upload(file, {
+        // Convert buffer to base64
+        const b64 = Buffer.from(file.buffer).toString('base64');
+        const dataURI = `data:${file.mimetype};base64,${b64}`;
+
+        const uploadResponse = await cloudinary.uploader.upload(dataURI, {
             resource_type: "auto",
             chunk_size: 6000000, // 6MB chunks for video upload
             folder: "course_thumbnails" // Organize uploads in a folder
@@ -52,15 +52,6 @@ export const uploadMedia = async (file) => {
             resource_type: uploadResponse.resource_type
         });
 
-        // Delete the temporary file after upload
-        try {
-            fs.unlinkSync(file);
-            console.log("Temporary file deleted successfully");
-        } catch (unlinkError) {
-            console.error("Error deleting temporary file:", unlinkError);
-            // Continue even if file deletion fails
-        }
-
         return {
             secure_url: uploadResponse.secure_url,
             public_id: uploadResponse.public_id
@@ -70,15 +61,6 @@ export const uploadMedia = async (file) => {
             message: error.message,
             error: error
         });
-        // Delete the temporary file if it exists
-        if (file && fs.existsSync(file)) {
-            try {
-                fs.unlinkSync(file);
-                console.log("Temporary file deleted after failed upload");
-            } catch (unlinkError) {
-                console.error("Error deleting temporary file after failed upload:", unlinkError);
-            }
-        }
         throw error;
     }
 };
