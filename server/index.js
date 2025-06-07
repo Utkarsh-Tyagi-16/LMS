@@ -17,7 +17,8 @@ dotenv.config();
 // Debug: Log environment variables
 console.log('Environment Variables:', {
     MONGO_URI: process.env.MONGO_URI ? 'Set' : 'Not Set',
-    NODE_ENV: process.env.NODE_ENV || 'development'
+    NODE_ENV: process.env.NODE_ENV || 'development',
+    FRONTEND_URL: process.env.FRONTEND_URL || 'Not Set'
 });
 
 const app = express();
@@ -32,8 +33,11 @@ app.use((req, res, next) => {
 // CORS middleware
 const allowedOrigins = [
   'http://localhost:5173',  // Local development
-  'https://lms-frontend-omega.vercel.app'  // Production
-];
+  'https://lms-frontend-omega.vercel.app',  // Production
+  process.env.FRONTEND_URL  // Dynamic frontend URL
+].filter(Boolean); // Remove any undefined values
+
+console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -41,9 +45,11 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.log('CORS blocked request from origin:', origin);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
+    console.log('CORS allowed request from origin:', origin);
     return callback(null, true);
   },
   credentials: true,
@@ -58,8 +64,13 @@ app.use(cors({
     'x-razorpay-payment-id',
     'x-razorpay-signature',
     'x-razorpay-order-id'
-  ]
+  ],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400 // 24 hours
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Special handling for Razorpay webhook - must be before other middleware
 app.post('/api/v1/purchase/razorpay-webhook', 
@@ -79,7 +90,8 @@ app.get('/', (req, res) => {
     message: 'Welcome to LMS API',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    frontendUrl: process.env.FRONTEND_URL
   });
 });
 
@@ -88,7 +100,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    frontendUrl: process.env.FRONTEND_URL
   });
 });
 
