@@ -17,13 +17,7 @@ dotenv.config();
 // Debug: Log environment variables
 console.log('Environment Variables:', {
     MONGO_URI: process.env.MONGO_URI ? 'Set' : 'Not Set',
-    SECRET_KEY: process.env.SECRET_KEY ? 'Set' : 'Not Set',
-    CLOUD_NAME: process.env.CLOUD_NAME ? 'Set' : 'Not Set',
-    API_KEY: process.env.API_KEY ? 'Set' : 'Not Set',
-    API_SECRET: process.env.API_SECRET ? 'Set' : 'Not Set',
-    FRONTEND_URL: process.env.FRONTEND_URL ? 'Set' : 'Not Set',
-    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not Set',
-    RAZORPAY_SECRET: process.env.RAZORPAY_SECRET ? 'Set' : 'Not Set'
+    NODE_ENV: process.env.NODE_ENV || 'development'
 });
 
 const app = express();
@@ -31,7 +25,7 @@ const PORT = process.env.PORT || 8080;
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
@@ -66,19 +60,26 @@ app.use(cookieParser());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
 });
 
 // MongoDB connection middleware
 const connectDBMiddleware = async (req, res, next) => {
   try {
+    console.log('Attempting to connect to MongoDB...');
     await connectDB();
+    console.log('MongoDB connection successful');
     next();
   } catch (error) {
     console.error('Database connection error:', error);
     res.status(500).json({
       success: false,
-      message: 'Database connection error'
+      message: 'Database connection error',
+      timestamp: new Date().toISOString()
     });
   }
 };
@@ -95,9 +96,13 @@ app.use("/api/v1/progress", courseProgressRoute);
 
 // 404 Handler
 app.use((req, res) => {
+  console.log(`404 Not Found: ${req.method} ${req.url}`);
   res.status(404).json({ 
     success: false,
-    message: "Route not found" 
+    message: "Route not found",
+    path: req.url,
+    method: req.method,
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -106,7 +111,10 @@ app.use((err, req, res, next) => {
   console.error("Error:", err);
   res.status(500).json({ 
     success: false,
-    message: "Internal server error"
+    message: "Internal server error",
+    timestamp: new Date().toISOString(),
+    path: req.url,
+    method: req.method
   });
 });
 
